@@ -9,6 +9,7 @@ const PaymentPage = () => {
     const { registration, amount } = location.state || {}; // Expecting registration object and amount
 
     const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'GPAY' | null>(null);
+    const [manualPaid, setManualPaid] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     useEffect(() => {
@@ -133,9 +134,20 @@ const PaymentPage = () => {
                             <div style={{ fontWeight: 'bold', color: 'var(--text)' }}>Nirmaladevi J</div>
                             <div style={{ fontFamily: 'monospace' }}>jvandana25-1@okaxis</div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--warning)' }}>
-                            <Loader size={20} className="spin" /> Waiting for admin approval...
-                        </div>
+                        {!manualPaid ? (
+                            <button
+                                className="btn btn-primary"
+                                style={{ width: '100%', marginTop: '1rem' }}
+                                onClick={() => setManualPaid(true)}
+                            >
+                                I Have Paid
+                            </button>
+                        ) : (
+                            <div className="animate-fade-in" style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(0, 243, 255, 0.1)', borderRadius: '0.5rem', border: '1px solid var(--primary)' }}>
+                                <CheckCircle size={32} color="var(--primary)" style={{ marginBottom: '0.5rem', display: 'block', margin: '0 auto' }} />
+                                <p style={{ color: '#fff', fontWeight: 'bold' }}>Please show this screen (and your payment screenshot) at the stall registration desk.</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
