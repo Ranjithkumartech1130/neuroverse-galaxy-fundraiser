@@ -20,7 +20,7 @@ const Layout = ({ children }: LayoutProps) => {
                 borderTop: '1px solid var(--border)',
                 marginTop: 'auto'
             }}>
-                <p>&copy;copy rights at SinthanAI .</p>
+                <p>&copy; {new Date().getFullYear()} SinthanAI. All rights reserved.</p>
             </footer>
         </div>
     );
