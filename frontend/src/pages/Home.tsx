@@ -76,7 +76,7 @@ const Home = () => {
                 </p>
 
                 <Link to="/about" className="btn btn-primary" style={{ fontSize: '1.2rem', padding: '1rem 2.5rem' }}>
-                    Initialize Sequence <ArrowRight size={20} />
+                    Understand the Mission <ArrowRight size={20} />
                 </Link>
             </section>
 

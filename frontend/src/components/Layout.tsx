@@ -20,7 +20,7 @@ const Layout = ({ children }: LayoutProps) => {
                 borderTop: '1px solid var(--border)',
                 marginTop: 'auto'
             }}>
-                <p>&copy; Neuroverse Galaxy. All rights reserved.</p>
+                <p>&copy;copy rights at SinthanAI .</p>
             </footer>
         </div>
     );
