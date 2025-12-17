@@ -59,7 +59,7 @@ const StallDetails = () => {
         keyword && p.id.includes(keyword)
     );
 
-    const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
+    const [selectedPackageIds, setSelectedPackageIds] = useState<string[]>([]);
     const [formData, setFormData] = useState({
         name: '',
         rollNo: '',
@@ -88,30 +88,39 @@ const StallDetails = () => {
 
     if (!stall) return <div className="container">Stall not found</div>;
 
-    const selectedPackage = allPackages.find(p => p.id === selectedPackageId);
+    const selectedPackages = allPackages.filter(p => selectedPackageIds.includes(p.id));
+    const totalPrice = selectedPackages.reduce((sum, pkg) => sum + pkg.price, 0);
+
+    const togglePackage = (pkgId: string) => {
+        setSelectedPackageIds(prev =>
+            prev.includes(pkgId) ? prev.filter(id => id !== pkgId) : [...prev, pkgId]
+        );
+    };
 
     const handlePayment = async () => {
-        if (!selectedPackage || !formData.name || !formData.email || !formData.phone || !formData.rollNo || !formData.studentClass) {
-            alert('Please fill in all required details (including Roll No & Class) and select a package.');
+        if (selectedPackageIds.length === 0 || !formData.name || !formData.email || !formData.phone || !formData.rollNo || !formData.studentClass) {
+            alert('Please fill in all required details (including Roll No & Class) and select at least one package.');
             return;
         }
 
         setLoading(true);
         try {
+            const combinedStallName = selectedPackages.map(p => `${p.title} (${p.type})`).join(', ');
+
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/registrations`, {
                 ...formData,
-                stallId: selectedPackage.id,
-                stallName: selectedPackage.title + ` (${selectedPackage.type})`,
-                amount: selectedPackage.price
+                stallId: selectedPackageIds.join(', '), // Comma separated IDs
+                stallName: combinedStallName,
+                amount: totalPrice
             });
 
             navigate('/payment', {
                 state: {
                     registration: {
                         id: res.data.registration.id,
-                        stallName: selectedPackage.title + ` (${selectedPackage.type})`
+                        stallName: combinedStallName
                     },
-                    amount: selectedPackage.price
+                    amount: totalPrice
                 }
             });
         } catch (err) {
@@ -140,6 +149,7 @@ const StallDetails = () => {
 
             <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--border)' }}>
                 <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2rem' }}>Choose Your Experience</h2>
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '2rem' }}>You can select multiple experiences!</p>
 
                 {/* Cosmic Mandalam Themes Display */}
                 {id === 'stall-2' && (
@@ -164,45 +174,48 @@ const StallDetails = () => {
 
                 {/* Packages Grid */}
                 <div className="grid-responsive" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-                    {filteredPackages.map(pkg => (
-                        <div
-                            key={pkg.id}
-                            onClick={() => setSelectedPackageId(pkg.id)}
-                            style={{
-                                background: selectedPackageId === pkg.id
-                                    ? (pkg.type === 'BASIC' ? 'rgba(0, 243, 255, 0.15)' : 'rgba(188, 19, 254, 0.15)')
-                                    : 'rgba(255, 255, 255, 0.03)',
-                                border: selectedPackageId === pkg.id
-                                    ? `2px solid ${pkg.type === 'BASIC' ? 'var(--primary)' : 'var(--secondary)'}`
-                                    : '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '1rem',
-                                padding: '1.5rem',
-                                cursor: 'pointer',
-                                position: 'relative',
-                                transition: 'all 0.2s',
-                                transform: selectedPackageId === pkg.id ? 'translateY(-5px)' : 'none'
-                            }}
-                        >
-                            {selectedPackageId === pkg.id && (
-                                <div style={{ position: 'absolute', top: '10px', right: '10px', color: pkg.type === 'BASIC' ? 'var(--primary)' : 'var(--secondary)' }}>
-                                    <CheckCircle size={24} fill={pkg.type === 'BASIC' ? 'var(--primary)' : 'var(--secondary)'} color="#000" />
+                    {filteredPackages.map(pkg => {
+                        const isSelected = selectedPackageIds.includes(pkg.id);
+                        return (
+                            <div
+                                key={pkg.id}
+                                onClick={() => togglePackage(pkg.id)}
+                                style={{
+                                    background: isSelected
+                                        ? (pkg.type === 'BASIC' ? 'rgba(0, 243, 255, 0.15)' : 'rgba(188, 19, 254, 0.15)')
+                                        : 'rgba(255, 255, 255, 0.03)',
+                                    border: isSelected
+                                        ? `2px solid ${pkg.type === 'BASIC' ? 'var(--primary)' : 'var(--secondary)'}`
+                                        : '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '1rem',
+                                    padding: '1.5rem',
+                                    cursor: 'pointer',
+                                    position: 'relative',
+                                    transition: 'all 0.2s',
+                                    transform: isSelected ? 'translateY(-5px)' : 'none'
+                                }}
+                            >
+                                {isSelected && (
+                                    <div style={{ position: 'absolute', top: '10px', right: '10px', color: pkg.type === 'BASIC' ? 'var(--primary)' : 'var(--secondary)' }}>
+                                        <CheckCircle size={24} fill={pkg.type === 'BASIC' ? 'var(--primary)' : 'var(--secondary)'} color="#000" />
+                                    </div>
+                                )}
+
+                                <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', paddingRight: '2rem' }}>{pkg.title}</h3>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem', color: pkg.type === 'BASIC' ? '#00f3ff' : '#bc13fe' }}>
+                                    ₹{pkg.price}
                                 </div>
-                            )}
 
-                            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', paddingRight: '2rem' }}>{pkg.title}</h3>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem', color: pkg.type === 'BASIC' ? '#00f3ff' : '#bc13fe' }}>
-                                ₹{pkg.price}
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                                    {pkg.inclusions.map((inc, i) => (
+                                        <li key={i} style={{ marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            • {inc}
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
-
-                            <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                                {pkg.inclusions.map((inc, i) => (
-                                    <li key={i} style={{ marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        • {inc}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* User Details & Checkout */}
@@ -221,6 +234,7 @@ const StallDetails = () => {
                                     style={{ width: '100%', padding: '0.8rem', borderRadius: '0.5rem', border: '1px solid var(--border)', background: 'rgba(0,0,0,0.3)', color: '#fff' }}
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                    maxLength={100}
                                 />
                             </div>
                             <div>
@@ -276,12 +290,12 @@ const StallDetails = () => {
 
                         <div style={{ marginTop: '2rem', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <div style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
-                                Total to Pay: <span style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>₹{selectedPackage ? selectedPackage.price : 0}</span>
+                                Total to Pay: <span style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>₹{totalPrice}</span>
                             </div>
 
                             <button
                                 onClick={handlePayment}
-                                disabled={!selectedPackage || loading}
+                                disabled={selectedPackageIds.length === 0 || loading}
                                 className="btn"
                                 style={{
                                     width: '100%',
@@ -289,14 +303,14 @@ const StallDetails = () => {
                                     padding: '1rem',
                                     fontSize: '1.2rem',
                                     fontWeight: 'bold',
-                                    background: selectedPackage?.type === 'BASIC' ? 'var(--primary)' : 'var(--secondary)',
-                                    color: selectedPackage?.type === 'BASIC' ? '#000' : '#fff',
+                                    background: selectedPackageIds.length > 0 ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
+                                    color: selectedPackageIds.length > 0 ? '#000' : 'rgba(255,255,255,0.3)',
                                     border: 'none',
-                                    opacity: (!selectedPackage || loading) ? 0.5 : 1,
-                                    cursor: (!selectedPackage || loading) ? 'not-allowed' : 'pointer'
+                                    opacity: (selectedPackageIds.length === 0 || loading) ? 0.5 : 1,
+                                    cursor: (selectedPackageIds.length === 0 || loading) ? 'not-allowed' : 'pointer'
                                 }}
                             >
-                                {loading ? 'Processing...' : `Book Now (₹${selectedPackage ? selectedPackage.price : 0})`}
+                                {loading ? 'Processing...' : `Book Now (₹${totalPrice})`}
                             </button>
                         </div>
                     </div>
