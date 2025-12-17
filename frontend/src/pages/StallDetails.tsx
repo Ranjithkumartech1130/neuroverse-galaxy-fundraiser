@@ -98,7 +98,7 @@ const StallDetails = () => {
 
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:5000/api/registrations', {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/registrations`, {
                 ...formData,
                 stallId: selectedPackage.id,
                 stallName: selectedPackage.title + ` (${selectedPackage.type})`,

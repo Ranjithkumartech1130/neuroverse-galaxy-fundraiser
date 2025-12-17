@@ -15,12 +15,12 @@ const Home = () => {
     const [totalRevenue, setTotalRevenue] = useState(0);
 
     useEffect(() => {
-        axios.get('http://localhost:5000/api/settings')
+        axios.get(`${import.meta.env.VITE_API_URL}/api/settings`)
             .then(res => setSettings(res.data))
             .catch(err => console.error("Failed to fetch settings", err));
 
         // Fetch revenue stats (public endpoint)
-        axios.get('http://localhost:5000/api/stats')
+        axios.get(`${import.meta.env.VITE_API_URL}/api/stats`)
             .then(res => setTotalRevenue(res.data.totalRevenue || 0))
             .catch(err => console.error("Failed to fetch stats", err));
     }, []);
