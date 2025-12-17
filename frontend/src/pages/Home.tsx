@@ -51,7 +51,7 @@ const Home = () => {
                 </div>
 
                 <h1 style={{
-                    fontSize: '4rem',
+                    fontSize: '2.5rem',
                     fontWeight: '900',
                     marginBottom: '1rem',
                     textTransform: 'uppercase',
