@@ -180,6 +180,7 @@ const AdminDashboard = () => {
                                                     <th style={{ padding: '1rem' }}>Name</th>
                                                     <th style={{ padding: '1rem' }}>Package</th>
                                                     <th style={{ padding: '1rem' }}>Contact</th>
+                                                    <th style={{ padding: '1rem' }}>Amount</th>
                                                     <th style={{ padding: '1rem' }}>Status</th>
                                                     <th style={{ padding: '1rem' }}>Action</th>
                                                 </tr>
@@ -199,6 +200,7 @@ const AdminDashboard = () => {
                                                             </span>
                                                         </td>
                                                         <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{reg.email}</td>
+                                                        <td style={{ padding: '1rem', fontWeight: 'bold' }}>₹{reg.amount}</td>
                                                         <td style={{ padding: '1rem' }}>
                                                             <span style={{
                                                                 color: reg.paymentStatus === 'Paid' ? 'var(--success)' : 'var(--warning)',
